@@ -1,5 +1,5 @@
 
-class Frutas {
+class Fruta {
 	
 	var puntos
 	

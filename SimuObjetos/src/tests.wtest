@@ -1,7 +1,31 @@
-// Acá los tests
+import Empleados.*
+import Roles.*
+import Tareas.*
+import Frutas.*
 
-test "testX" {
-
-	assert.that(true)
-
+describe "Minions"{
+	
+	var kevin = new Ciclope()
+	var banana = new Fruta(10)
+	
+	test "al comer una fruta sube su estamina"
+	{
+		kevin.comerFruta(banana)
+		assert.equals(60, kevin.estamina())
+	}
+	
+	test "la experiencia de kevin al limpiar sector es 10 "
+	{
+		kevin.cambiarRol(new Mucama())
+		kevin.hacerTarea(new LimpiarSector())
+		assert.equals(10, kevin.experiencia())
+	}
+	
+	test "al hacer una tarea, la tarea se va agregando a las tareas realizadas "
+	{
+		kevin.cambiarRol(new Soldado())
+		kevin.hacerTarea(new DefenderSector())
+		assert.equals(["Tareas.DefenderSector"],kevin.tareas().map{tarea=>tarea.className()})
+	}
+	
 }

@@ -1,74 +1,70 @@
 import Roles.*
 
-class Tarea {
+class ArreglarMaquina {
 	
-	
-	method arreglar(empleado,unaTarea)
-	
-	method dificultad(unaTarea){
-		
-		return self.dificultadDeUnaTarea(unaTarea)
-		
-	}
-		
-	method dificultadDeUnaTarea(unaTarea)
-	
-}
-
-class ArreglarMaquina inherits Tarea {
-	
-	var complejidad
+	var complejidad = 100
+	var herramientasRequeridas = #{}
 	
 	method complejidad(){
 		
 		return complejidad
 	}
-	
-	override method arreglar(empleado,unaTarea){
+	/* El requerimiento para poder arreglar una máquina es tener tanta estamina como 
+	 * complejidad tenga la	máquina y tener las herramientas necesarias para arreglarla (nótese 
+	 * que si la máquina no requiere de	ninguna herramienta, cualquier empleado con estamina 
+	 * suficiente puede arreglarla). */
+	 
+	method puedoHacerla(empleado){
 		
-		return empleado.estamina() >= complejidad 
+		return empleado.tieneHerramientas(herramientasRequeridas) and empleado.estamina() >= complejidad 
 	}
 	
-	override method dificultadDeUnaTarea(unaTarea){
+	method hacetePor(empleado){
 		
-		return complejidad  * 2
+		empleado.perderEstamina(complejidad)
+	}
+	
+	method dificultad(empleado){
+		
+		return complejidad * 2
 	}
 		
 }
 
-class RolMucamaException inherits Exception {}
 
-class DefenderSector inherits Tarea {
+
+class DefenderSector {
 	
-	var amenaza
+	var gradoAmenaza = 5
 	
-	method amenaza(){
+	method puedoHacerla(empleado){
 		
-		return amenaza
-	}
-	
-	override method arreglar(empleado,unaTarea){
-		if(empleado.rol() == new Mucama()){
-			
-			throw new RolMucamaException("NO PUEDE SER MUCAMA")
-		}
-		if(empleado.rol() != new Soldado()){
-			
-			empleado.estamina() / 2
-		}
-		
-		return empleado.fuerza() >= amenaza
+		return empleado.puedoDefender() and empleado.fuerza() >= gradoAmenaza
 		
 	}
 	
-	override method dificultadDeUnaTarea(unaTarea){
+	method hacetePor(empleado){
+		if(empleado.esSoldado()){
+			
+			empleado.incrementarDanio(2)
+			
+		}else{
+			
+			empleado.perderMitadEstamina()
+		}
+		
+	}
+	
+	
+	method dificultad(empleado){
 //		La dificultad de esta tarea es el grado de
 //		 amenaza para los Bíclopes y el doble para los Cíclopes.
+		return gradoAmenaza * empleado.factorDebilidad()
 	}
 	
 }
 
-class LimpiarSector inherits Tarea {
+class LimpiarSector {
 	
 	var dificultad = 10
 	var tamanio = grande
@@ -78,21 +74,42 @@ class LimpiarSector inherits Tarea {
 		dificultad = valor
 	}
 	
-	override method arreglar(empleado,unaTarea){
-	
-		return empleado.estamina() >= 4 and tamanio == grande 
-	}
-	
-	override method dificultadDeUnaTarea(unaTarea){
+	method cambiarTamanio(_tamanio){
 		
+		tamanio = _tamanio
+	}
+	
+	method puedoHacerla(empleado){
+	
+		return empleado.estaminaMayorA(tamanio.estaminaNecesaria())
+	}
+	
+	method hacetePor(empleado){
+		
+		empleado.perderEstamina(tamanio.estaminaNecesaria())
+	}
+	
+	method dificultad(empleado){
+		
+		return dificultad
 	}
 }
 
-object grande{
+
+object grande {
 	
+	method estaminaNecesaria(){
+		
+		return 4
+	}
 }
 
-object chico{
+object otroTamanio {
 	
-	
+	method estaminaNecesaria(){
+		
+		return 1
+	}
 }
+
+class RolMucamaException inherits Exception {}

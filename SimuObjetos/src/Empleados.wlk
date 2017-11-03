@@ -3,19 +3,11 @@ import Tareas.*
 import Frutas.*
 
 
-//biclopes-->tareas-->estamina=10 / Ciclopes--->armas-->estamina= 9999
 class Empleado {
 	
 	var rol
-	var tarea
-	var estamina
-	
-	constructor(_rol,_tarea,_estamina){
-		
-		rol = _rol
-		tarea = _tarea
-		estamina = _estamina	
-	}
+	var tareasRealizadas = #{}
+	var estamina = 50
 	
 	method cambiarRol(_rol){
 		
@@ -27,14 +19,9 @@ class Empleado {
 		return rol
 	}
 	
-	method cambiarTarea(_tarea){
+	method tareas(){
 		
-		tarea = _tarea
-	}
-	
-	method tarea(){
-		
-		return tarea
+		return tareasRealizadas
 	}
 	
 	method estamina(){
@@ -42,16 +29,19 @@ class Empleado {
 		return estamina
 	}
 	
-	method fuerza(){
+	/*Conocer la experiencia de un empleado, que se obtiene a partir de la cantidad de tareas
+	realizadas multiplicada por la sumatoria de sus dificultades. */
+	
+	method experiencia(){
 		
-		return (estamina / 2) + 2 + rol.danio()//practica
+		return tareasRealizadas.size() * self.dificultadAcumulada()
 	}
 	
-	method hacerTarea(unaTarea){
+	method dificultadAcumulada(){
 		
-		unaTarea.arreglar(self,unaTarea)
-		estamina -= unaTarea.complejidad() 
+		return tareasRealizadas.sum({tarea => tarea.dificultad(self)})
 	}
+	// punto 1
 	
 	method comerFruta(unaFruta){
 		
@@ -63,5 +53,82 @@ class Empleado {
 		
 		self.comerFruta(unaFruta)
 	}
+	
+	method fuerza(){
+		
+		return (estamina / 2) + 2
+	}
+	
+	method fuerzaPorRol(){
+		
+		return rol.fuerzaExtra()
+	}
+	
+	method hacerTarea(unaTarea){
+		if(not unaTarea.puedoHacerla(self)){
+			throw new NoPuedoHacerlaException()
+		}
+		
+		tareasRealizadas.add(unaTarea)
+		rol.hacerPor(self,unaTarea)
+		 
+	}
+	
+	method tieneHerramientas(listaHerramientas){
+		
+		return rol.tieneEstasHerramientas(listaHerramientas)
+	}
+	
+	method perderEstamina(puntos){
+		
+		estamina -= puntos 
+	}
+	
+	method puedoDefender(){
+		
+		return rol.puedeDefender()
+	}
+	
+	method perderMitadEstamina(){
+		
+		estamina = estamina / 2
+	}
+	
+	method estaminaMayorA(_estamina){
+		
+		return estamina > _estamina
+	}
+	
+	method esSoldado(){
+		
+		return rol.esSoldado()
+	}
+	
+	method incrementarDanio(puntos){
+		
+		return rol.aumentarDanio(puntos)
+	}
 }
 
+class Biclope inherits Empleado {
+	
+	method factorDebilidad(){
+		
+		return 1
+	}
+}
+
+class Ciclope inherits Empleado {
+	
+	method factorDebilidad(){
+		
+		return 2
+	}
+	
+	override method fuerza(){
+		
+		return (super() + self.fuerzaPorRol()) / 2
+	}
+}
+
+class NoPuedoHacerlaException inherits Exception {}
